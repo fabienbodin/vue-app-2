@@ -2,13 +2,14 @@
   <v-app>
     <Navbar/>
     <v-main>
-      <Home/>
+      <v-container>
+      <router-view></router-view>
+      </v-container>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import Home from "@/views/Home";
 import Navbar from "@/components/Navbar";
 
 export default {
@@ -16,11 +17,10 @@ export default {
 
   components: {
     Navbar,
-    Home,
   },
 
   data: () => ({
-    //
+
   }),
 };
 </script>

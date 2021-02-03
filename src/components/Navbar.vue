@@ -2,16 +2,10 @@
   <v-app-bar color="deep-purple accent-4" dark app>
     <v-toolbar-title>Gestion des utilisateurs</v-toolbar-title>
     <v-spacer></v-spacer>
-    <v-btn icon @click="openAddEdit()">
-      <v-icon>mdi-plus</v-icon>
-    </v-btn>
-    <!--<template v-slot:extension>
-      <v-tabs align-with-title>
-        <v-tab>Tab 1</v-tab>
-        <v-tab>Tab 2</v-tab>
-        <v-tab>Tab 3</v-tab>
-      </v-tabs>
-    </template>-->
+    <v-tabs right>
+      <v-tab to="/">Utilisateurs</v-tab>
+      <v-tab to="/settings">Paramètres</v-tab>
+    </v-tabs>
   </v-app-bar>
 </template>
 
