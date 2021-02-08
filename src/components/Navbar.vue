@@ -2,7 +2,7 @@
   <v-app-bar dark app
              fade-img-on-scroll
              src="@/assets/images/image-1.jpg">
-    <v-toolbar-title>Gestion des utilisateurs</v-toolbar-title>
+    <v-toolbar-title>Gestionnaire</v-toolbar-title>
     <v-spacer></v-spacer>
     <v-tabs right>
       <v-tab to="/">Utilisateurs</v-tab>
