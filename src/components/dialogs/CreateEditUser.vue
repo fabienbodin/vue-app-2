@@ -33,11 +33,12 @@
           </v-row>
           <v-row>
             <v-col cols="12" sm="12">
-              <v-select label="Sexe" outlined v-model="user.gender" :items="genders"></v-select>
+              <v-select label="Genre" outlined v-model="user.gender" :items="genders"></v-select>
             </v-col>
           </v-row>
         </v-container>
       </v-form>
+      <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn class="ma-2" color="darken-1" outlined @click="cancel()">Annuler</v-btn>
@@ -48,11 +49,17 @@
 </template>
 
 <script>
+import GendersMixin from "@/components/mixins/GendersMixin";
+
 export default {
   name: "CreateEditUser",
+  mixins: [GendersMixin],
   props: {
     isShow: Boolean,
     editData: Object
+  },
+  mounted() {
+    this.loadGenders();
   },
   data: () => ({
     user: {
@@ -62,12 +69,11 @@ export default {
       email: null,
       gender: null,
     },
-    page_title: 'Nouvel utilisateur',
-    genders: ['Homme', 'Femme']
+    page_title: 'Nouvel utilisateur'
   }),
   methods: {
     complete() {
-      this.$emit('complete', { firstname: this.firstname });
+      this.$emit('complete', this.user);
     },
     cancel() {
       this.$emit('complete', false);

@@ -2,48 +2,90 @@
   <div>
     <v-card>
       <v-card-title>
+        Utilisateurs
         <v-spacer></v-spacer>
+        <v-btn @click="remove(selected)" outlined small v-if="selected.length > 0" color="red darken-2" style="margin-right: 5px;">Supprimer</v-btn>
         <v-btn @click="edit(null)" outlined small>Ajouter</v-btn>
       </v-card-title>
       <v-data-table
+          v-model="selected"
           :headers="headers"
           :items="users"
           item-key="uuid"
+          show-select
           class="elevation-1"
       >
         <template v-slot:item.actions="{ item }">
-          <v-btn icon small @click="edit(item)"><v-icon small>mdi-pencil</v-icon></v-btn>
-          <v-btn icon small color="red darken-2" @click="remove(item)"><v-icon small>mdi-delete</v-icon></v-btn>
+          <v-btn icon small @click="edit(item)" outlined style="margin-right: 5px;"><v-icon small>mdi-pencil</v-icon></v-btn>
+          <v-btn icon small color="red darken-2" @click="remove([item])" outlined><v-icon small>mdi-delete</v-icon></v-btn>
         </template>
       </v-data-table>
     </v-card>
     <CreateEditUser :is-show="dialogs.create_edit.show" :edit-data="dialogs.create_edit.user" @complete="completeAddEdit" />
+    <DeleteUser :is-show="dialogs.remove.show" :multiple-delete="dialogs.remove.items > 1" @complete="completeRemove" />
+    <Notification :is-show="notification.show" :content="notification.message" @hide="hideNotification" />
   </div>
 </template>
 
 <script>
 import { uuid } from "vue-uuid";
 import CreateEditUser from "@/components/dialogs/CreateEditUser";
+import UsersMixin from "@/components/mixins/UsersMixin.js";
+import DeleteUser from "@/components/dialogs/DeleteUser";
+import Notification from "@/components/Notification";
+import NotificationMixin from "@/components/mixins/NotificationMixin";
 
 export default {
   name: "Users",
-  components: {CreateEditUser},
+  components: {Notification, DeleteUser, CreateEditUser},
+  mixins: [UsersMixin, NotificationMixin],
   methods: {
-    showCreateEdit() {
-    },
     completeAddEdit(item) {
       if (item === false) {
         this.dialogs.create_edit.show = false;
         return;
       }
-      console.log('todo: insert data');
+      if (item.uuid) {
+        const searchUser = this.users.filter(x => x.uuid === item.uuid)[0];
+        if (searchUser !== undefined) {
+          searchUser.firstname = item.firstname;
+          searchUser.lastname = item.lastname;
+          searchUser.email = item.email;
+          searchUser.gender = item.gender;
+        }
+        this.showNotification('Utilisateur modifié');
+      } else {
+        item.uuid = uuid.v4();
+        this.users.push(item);
+        this.showNotification('Utilisateur ajouté');
+      }
+      this.dialogs.create_edit.show = false;
+      this.saveUsers();
     },
     edit(item) {
       this.dialogs.create_edit.user = item;
-      this.dialogs.create_edit.show = !this.dialogs.create_edit.show;
+      this.dialogs.create_edit.show = true;
     },
     remove(item) {
-      console.log('todo: delete data', item);
+      this.dialogs.remove.items = item;
+      this.dialogs.remove.show = true;
+    },
+    completeRemove(rm) {
+      if (rm) {
+        this.users = this.users.filter(x => !this.dialogs.remove.items.includes(x));
+      }
+      this.dialogs.remove.show = false;
+      if (this.dialogs.remove.items.length > 1)
+        this.showNotification('Utilisateurs supprimés');
+      else
+        this.showNotification('Utilisateur supprimé')
+      this.saveUsers();
+    },
+    /**
+     * La fonction init est appelée lorsque le composant est mounted.
+     */
+    init() {
+      this.loadUsers();
     }
   },
   data: () => ({
@@ -51,11 +93,11 @@ export default {
       create_edit: {
         show: false,
         user: {}
+      },
+      remove: {
+        show: false,
+        items: []
       }
-    },
-    dialogCreateEdit: {
-      show: false,
-      user: {}
     },
     headers: [
       { text: 'UUID', value: 'uuid' },
@@ -65,17 +107,11 @@ export default {
       { text: 'Genre', value: 'gender' },
       { text: 'Actions', value: 'actions' }
     ],
-    users: [
-      { uuid: uuid.v4(), firstname: "John", lastname: "Doe", email: "john.doe@unknown.com", gender: "Homme" },
-      { uuid: uuid.v4(), firstname: "Jane", lastname: "Doe", email: "jane.doe@unknown.com", gender: "Femme" },
-      { uuid: uuid.v4(), firstname: "Javier", lastname: "Arnold", email: "javier.arnold@unknown.com", gender: "Homme" },
-      { uuid: uuid.v4(), firstname: "Stella", lastname: "Larson", email: "stella.larson@unknown.com", gender: "Femme" },
-      { uuid: uuid.v4(), firstname: "Amelia", lastname: "Owens", email: "amelia.owens@unknown.com", gender: "Femme" },
-      { uuid: uuid.v4(), firstname: "Jessie", lastname: "Holmes", email: "jessie.holmes@unknown.com", gender: "Homme" },
-      { uuid: uuid.v4(), firstname: "Jimmy", lastname: "Carroll", email: "jimmy.carroll@unknown.com", gender: "Homme" },
-      { uuid: uuid.v4(), firstname: "Sarah", lastname: "Robinson", email: "sarah.robinson@unknown.com", gender: "Femme" },
-    ]
-  })
+    selected: []
+  }),
+  mounted() {
+    this.init();
+  }
 }
 </script>
 
